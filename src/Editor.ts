@@ -184,9 +184,9 @@ function refreshShaderList(): void {
 
     let actions = $('<td/>').appendTo(row);
     actions.append($('<a href="#">Execute</a>').click(() => onExecuteShader(shader)));
-    actions.append('&nbsp;|&nbsp;');
+    actions.append(' | ');
     actions.append($('<a href="#">Edit</a>').click(() => onEditShader(shader)));
-    actions.append('&nbsp;|&nbsp;');
+    actions.append(' | ');
     actions.append($('<a href="#">Delete</a>').click(() => onDeleteShader(shader)));
   });
 }
@@ -331,7 +331,7 @@ function refreshTextureList(): void {
     }
 
     // Dimensions column
-    row.append($('<td/>').text(`${texture.canvas.w} x ${texture.canvas.h}`));
+    row.append($('<td/>').html(`${texture.canvas.w}&nbsp;x&nbsp;${texture.canvas.h}`));
 
     let actions = $('<td/>').appendTo(row);
     actions.append($('<a href="#">View</a>').click(() => onViewTexture(texture)));
@@ -343,11 +343,11 @@ function refreshTextureList(): void {
     actions.append($('<a href="#">B</a>').click(() => onViewTextureChannel(texture, 'B')));
     actions.append('&nbsp;');
     actions.append($('<a href="#">A</a>').click(() => onViewTextureChannel(texture, 'A')));
-    actions.append(')&nbsp;|&nbsp;');
+    actions.append(') | ');
     actions.append($('<a href="#">Download</a>').click(() => onDownloadTexture(texture)));
-    actions.append('&nbsp;|&nbsp;');
+    actions.append(' | ');
     actions.append($('<a href="#">Rename</a>').click(() => onRenameTexture(texture)));
-    actions.append('&nbsp;|&nbsp;');
+    actions.append(' | ');
     actions.append($('<a href="#">Delete</a>').click(() => onDeleteTexture(texture)));
   });
 }
