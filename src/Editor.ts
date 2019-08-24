@@ -8,7 +8,7 @@ import { SelectChannelProgram } from './SelectChannel';
 import { Shader, VariableDefinition } from './Shader';
 import { Texture } from './Texture';
 import { DisposableSet } from '@leosingleton/commonlibs';
-import { FimCanvas, FimGLCanvas, FimGLTexture } from '@leosingleton/fim';
+import { FimCanvas, FimGLCanvas, FimGLTexture, FimGLTextureOptions, FimGLTextureFlags } from '@leosingleton/fim';
 import { saveAs } from 'file-saver';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -130,11 +130,12 @@ function onExecuteShader(shader: Shader): void {
     let id = `uniform-${u.variableName}`;
     let text = `${u.variableName} (${u.variableType})`;
 
-    let group = $('<div class="form-group"/>').attr('for', id).appendTo('#execute-shader-form');
-    group.append($('<label class="control-label"/>').text(text));
+    let group = $('<div class="form-group"/>').appendTo('#execute-shader-form');
+    group.append($('<label class="control-label"/>').attr('for', id).text(text));
     if (u.variableType.indexOf('sampler') === -1) {
       group.append($('<input type="text" class="form-control"/>').attr('id', id).val(u.dialogValue));
     } else {
+      // sampler2D uniforms are special: We show a drop-down of textures instead
       let select = $('<select class="form-control"/>').attr('id', id).appendTo(group);
       textures.forEach(texture => {
         let name = `${texture.name} (${texture.canvas.w} x ${texture.canvas.h})`;
@@ -145,6 +146,13 @@ function onExecuteShader(shader: Shader): void {
       if (u.dialogValue) {
         select.val(u.dialogValue);
       }
+
+      // Also show a checkbox to enable linear sampling
+      let check = $('<div class="form-check"/>').appendTo('#execute-shader-form');
+      let checkId = `linear-${u.variableName}`;
+      check.append($('<input type="checkbox" class="form-check-input"/>').attr('id', checkId).prop('checked',
+        u.enableLinearFiltering));
+      check.append($('<label class="form-check-label"/>').attr('for', checkId).text('Enable linear filtering'));
     }
   }
 
@@ -171,7 +179,9 @@ function runCurrentShader(): FimCanvas {
         program.setUniform(uname, value);
       } else {
         let canvas = textures.find(v => v.id === value).canvas;
-        let inputTexture = disposable.addDisposable(new FimGLTexture(gl, canvas.w, canvas.h));
+        let linear = $(`#linear-${u.variableName}`).prop('checked') as boolean;
+        let options: FimGLTextureOptions = linear ? { textureFlags: FimGLTextureFlags.LinearSampling } : {};
+        let inputTexture = disposable.addDisposable(new FimGLTexture(gl, canvas.w, canvas.h, options));
         inputTexture.copyFrom(canvas);
         program.setUniform(uname, inputTexture);
       }
@@ -184,8 +194,8 @@ function runCurrentShader(): FimCanvas {
   // On success, store the values for the next time the execute dialog is opened for this shader
   for (let uname in currentShader.uniforms) {
     let u = currentShader.uniforms[uname] as VariableDefinition;
-    let id = `#uniform-${u.variableName}`;
-    u.dialogValue = $(id).val().toString();
+    u.dialogValue = $(`#uniform-${u.variableName}`).val().toString();
+    u.enableLinearFiltering = $(`#linear-${u.variableName}`).prop('checked');
   }
 
   return result;

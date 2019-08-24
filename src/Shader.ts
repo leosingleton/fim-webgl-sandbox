@@ -75,8 +75,11 @@ export class Shader implements FimGLShader {
   private static idCount = 0;
 }
 
-/** Adds an additional property to the existing interface */
+/** Adds additional properties to the existing interface to track dialog state and avoid creating a new object */
 export interface VariableDefinition extends FimGLVariableDefinition {
   /** Uniform value, as it appears as a string in the UI */
   dialogValue: string;
+
+  /** For sampler2D uniforms, controls whether linear filtering is enabled */
+  enableLinearFiltering: boolean;
 }
