@@ -19,38 +19,40 @@
         <h5>Create, test, and debug WebGL fragment shaders</h5>
       </div>
 
-      <div class="py-3">
-        <table class="table">
-          <thead class="thead-dark">
-            <tr>
-              <th>Shader (<a href="#" onclick="Samples.Editor.addShader()">Create</a>
-                &nbsp;|&nbsp;
-                <a href="#"><label for="shader-upload">Import</label><input type="file" id="shader-upload"
-                  style="display:none" accept="text/plain" multiple
-                  onchange="Samples.Editor.uploadShaders(this.files)" /></a>)
-              </th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="shaders"></tbody>
-        </table>
-      </div>
-
-      <div class="py-3">
-        <table class="table">
+      <div class="row">
+        <div class="col-lg-6">
+          <table class="table">
             <thead class="thead-dark">
               <tr>
-                <th>Texture
-                  (<a href="#"><label for="texture-upload">Import</label><input type="file" id="texture-upload"
-                    style="display:none" accept="image/*" multiple
-                    onchange="Samples.Editor.uploadTextures(this.files)" /></a>)
+                <th>Shader (<a href="#" onclick="Samples.Editor.addShader()">Create</a>
+                  &nbsp;|&nbsp;
+                  <a href="#"><label for="shader-upload">Import</label><input type="file" id="shader-upload"
+                    style="display:none" accept="text/plain" multiple
+                    onchange="Samples.Editor.uploadShaders(this.files)" /></a>)
                 </th>
-                <th>Dimensions</th>
                 <th>Actions</th>
               </tr>
             </thead>
-          <tbody id="textures"></tbody>
-        </table>
+            <tbody id="shaders"></tbody>
+          </table>
+        </div>
+
+        <div class="col-lg-6">
+          <table class="table">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Texture
+                    (<a href="#"><label for="texture-upload">Import</label><input type="file" id="texture-upload"
+                      style="display:none" accept="image/*" multiple
+                      onchange="Samples.Editor.uploadTextures(this.files)" /></a>)
+                  </th>
+                  <th>Dimensions</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            <tbody id="textures"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="modal fade" tabindex="-1" id="add-shader">
