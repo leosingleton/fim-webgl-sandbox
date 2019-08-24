@@ -30,6 +30,7 @@
     "@leosingleton/fim": "1.0.0-alpha.14"
   },
   "scripts": {
-    "build": "npx webpack --mode=none"
+    "build": "webpack --mode=development",
+    "build:production": "webpack --mode=production"
   }
 }

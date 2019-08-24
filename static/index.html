@@ -2,18 +2,13 @@
 <html>
   <head>
     <title>WebGL Sandbox - Create, test, and debug WebGL fragment shaders</title>
-    <link href="bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
     <link href="assets/css/sandbox.css" rel="stylesheet" />
-    <script src="samples.js"></script>
+    <script src="assets/js/sandbox.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
 
   <body>
-    <script>
-      window.onload = function() {
-        Samples.Editor.onLoad();
-      }
-    </script>
     <div class="container">
       <div class="jumbotron">
         <h1>WebGL Sandbox</h1>
@@ -25,11 +20,11 @@
           <table class="table">
             <thead class="thead-dark">
               <tr>
-                <th>Shader (<a href="#" class="whitelink" onclick="Samples.Editor.addShader()">Create</a>
+                <th>Shader (<a href="#" class="whitelink" onclick="Sandbox.Editor.addShader()">Create</a>
                   |
                   <a href="#"><label for="shader-upload" class="whitelink">Import</label><input type="file"
                     id="shader-upload" style="display:none" accept="text/plain" multiple
-                    onchange="Samples.Editor.uploadShaders(this.files)" /></a>)
+                    onchange="Sandbox.Editor.uploadShaders(this.files)" /></a>)
                 </th>
                 <th>Actions</th>
               </tr>
@@ -45,7 +40,7 @@
                   <th>Texture
                     (<a href="#"><label for="texture-upload" class="whitelink">Import</label><input type="file"
                       id="texture-upload" style="display:none" accept="image/*" multiple
-                      onchange="Samples.Editor.uploadTextures(this.files)" /></a>)
+                      onchange="Sandbox.Editor.uploadTextures(this.files)" /></a>)
                   </th>
                   <th>Dimensions</th>
                   <th>Actions</th>
@@ -117,7 +112,7 @@
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary btn-lg" onclick="Samples.Editor.executeShaderOk()">Execute</button>
+              <button type="button" class="btn btn-primary btn-lg" onclick="Sandbox.Editor.executeShaderOk()">Execute</button>
             </div>           
           </div>
         </div>

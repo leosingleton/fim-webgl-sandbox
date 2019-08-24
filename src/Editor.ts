@@ -11,26 +11,26 @@ import { saveAs } from 'file-saver';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-export namespace Editor {
-  export function onLoad(): void {
-    // Load previous shaders from local storage on startup
-    for (let n = 0; n < localStorage.length; n++) {
-      let key = localStorage.key(n);
-      if (key.indexOf('shader_name_') === 0) {
-        // We found a shader
-        let id = Number.parseInt(key.substring(12));
-        let name = localStorage.getItem(`shader_name_${id}`);
-        let source = localStorage.getItem(`shader_source_${id}`);
+$(() => {
+  // Load previous shaders from local storage on startup
+  for (let n = 0; n < localStorage.length; n++) {
+    let key = localStorage.key(n);
+    if (key.indexOf('shader_name_') === 0) {
+      // We found a shader
+      let id = Number.parseInt(key.substring(12));
+      let name = localStorage.getItem(`shader_name_${id}`);
+      let source = localStorage.getItem(`shader_source_${id}`);
 
-        // Create the shader
-        let shader = new Shader(name, source, id);
-        shaders.push(shader);  
-      }
+      // Create the shader
+      let shader = new Shader(name, source, id);
+      shaders.push(shader);  
     }
-
-    refreshShaderList();
   }
 
+  refreshShaderList();
+});
+
+export namespace Editor {
   export function addShader(): void {
     onEditShader();
   }
