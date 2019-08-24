@@ -2,11 +2,13 @@
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
+import { Program } from './Program';
 import { SelectChannelProgram } from './SelectChannel';
-import { FimCanvas, FimGLCanvas, FimGLProgram, FimGLTexture } from '@leosingleton/fim';
-import { FimGLVariableDefinition, FimGLVariableDefinitionMap,
-  FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
-import { using, DisposableSet } from '@leosingleton/commonlibs';
+import { Shader } from './Shader';
+import { Texture } from './Texture';
+import { DisposableSet } from '@leosingleton/commonlibs';
+import { FimCanvas, FimGLCanvas, FimGLTexture } from '@leosingleton/fim';
+import { FimGLVariableDefinition } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { saveAs } from 'file-saver';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -88,87 +90,6 @@ export namespace Editor {
     }
     refreshTextureList();
   }
-}
-
-class Program extends FimGLProgram {
-  public constructor(canvas: FimGLCanvas, fragmentShader: FimGLShader) {
-    super(canvas, fragmentShader);
-  }
-
-  public compileProgram(): void {
-    super.compileProgram();
-  }
-
-  public setUniform(name: string, value: number | number[] | boolean | FimGLTexture): void {
-    this.fragmentShader.uniforms[name].variableValue = value;
-  }
-}
-
-class Shader implements FimGLShader {
-  public constructor(name: string, sourceCode: string, id?: number) {
-    let match: RegExpExecArray
-
-    if (!id) {
-      id = ++Shader.idCount;
-    }
-
-    // When loading from localStorage, also increment the next ID
-    if (id > Shader.idCount) {
-      Shader.idCount = id;
-    }
-
-    this.id = id;
-    this.name = name;
-    this.sourceCode = sourceCode;
-
-    // Parse the source code looking for uniforms
-    let uniformRegex = /uniform\s(\w+)\s(\w+)/g;
-    while (match = uniformRegex.exec(sourceCode)) {
-      this.uniforms[match[2]] = {
-        variableName: match[2],
-        variableType: match[1]
-      };
-    }
-
-    // Try to compile the shader
-    using(new FimGLCanvas(100, 100), gl => {
-      using(new Program(gl, this), program => {
-        program.compileProgram();
-      });
-    });
-
-    // Write the shader to local storage
-    localStorage.setItem(`shader_name_${id}`, name);
-    localStorage.setItem(`shader_source_${id}`, sourceCode);
-  }
-
-  public readonly id: number;
-  public readonly name: string;
-  public readonly sourceCode: string;
-  public readonly uniforms: FimGLVariableDefinitionMap = {};
-  public readonly consts: FimGLVariableDefinitionMap = {};
-  public executionCount = 0;
-
-  public static createFromFile(file: File): Promise<Shader> {
-    return new Promise((resolve, reject) => {
-      let fr = new FileReader();
-      fr.readAsText(file);
-
-      // On success, create a Shader and return it via the Promise
-      fr.onload = () => {
-        let source = fr.result as string;
-        let shader = new Shader(file.name, source);
-        resolve(shader);
-      };
-
-      // On error, return an exception via the Promise
-      fr.onerror = err => {
-        reject(err);
-      };
-    });
-  }
-
-  private static idCount = 0;
 }
 
 let shaders: Shader[] = [];
@@ -291,26 +212,6 @@ function onDeleteShader(shader: Shader): void {
   // Also delete from local storage
   localStorage.removeItem(`shader_name_${shader.id}`);
   localStorage.removeItem(`shader_source_${shader.id}`);
-}
-
-class Texture {
-  public constructor(name: string, canvas: FimCanvas) {
-    this.id = ++Texture.idCount;
-    this.name = name;
-    this.canvas = canvas;
-  }
-
-  public readonly id: number;
-  public readonly name: string;
-  public readonly canvas: FimCanvas;
-  public isRenaming = false;
-
-  public static async createFromFile(file: File): Promise<Texture> {
-    let canvas = await FimCanvas.createFromImageBlob(file);
-    return new Texture(file.name, canvas);
-  }
-
-  private static idCount = 0;
 }
 
 let textures: Texture[] = [];
