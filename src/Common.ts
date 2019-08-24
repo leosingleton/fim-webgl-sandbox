@@ -1,37 +1,9 @@
-// FIM - Fast Image Manipulation Library for Javascript
+// WebGL Sandbox
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
-import { FimCanvas, FimGLCanvas, FimGLCapabilities, FimGLProgramCopy, FimGLTexture,
-  FimRect } from '../../build/dist/index.js';
-import { Stopwatch, parseQueryString, using } from '@leosingleton/commonlibs';
+import { Stopwatch } from '@leosingleton/commonlibs';
 import $ from 'jquery';
-
-let qs = parseQueryString();
-
-/** Loads a test image and returns the JPEG as a byte array */
-export async function loadTestImageToArray(): Promise<Uint8Array> {
-  // Load a sample JPEG image into a byte array
-  let url = qs['img'] || 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg';
-  let fetchResponse = await fetch(url, { method: 'GET' });
-  let jpeg = await fetchResponse.arrayBuffer();
-  return new Uint8Array(jpeg);
-}
-
-/** Loads a test image onto a FimCanvas */
-export async function loadTestImage(): Promise<FimCanvas> {
-  let jpeg = await loadTestImageToArray();
-  return FimCanvas.createFromJpeg(jpeg);
-}
-
-/** Blocks execution until the browser is ready to render another frame */
-export async function waitForAnimationFrame(): Promise<void> {
-  return new Promise(resolve => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-}
 
 /** Performance testing results */
 export interface IPerformanceResults {
@@ -187,83 +159,6 @@ export function perfTestAsync(description: string, test: () => Promise<void>, bl
   return p.runAsync();
 }
 
-/**
- * Renders output the the screen
- * @param canvas Canvas to render
- * @param message Text to overlay onto the image
- * @param maxDimension Maximum dimension of the output canvas, in pixels. If unspecified, the output is unscaled from
- *    the input canvas.
- * @param domCanvasId ID of the canvas element on the DOM. If unspecified, a new one is created.
- */
-export function renderOutput(canvas: FimCanvas | FimGLCanvas, message?: string, maxDimension?: number,
-    domCanvasId?: string): Promise<void> {
-  // Calculate width and height
-  let outputDimensions = canvas.imageDimensions;
-  if (maxDimension) {
-    outputDimensions = FimRect.downscaleToMaxDimension(outputDimensions.w, outputDimensions.h, maxDimension);
-  }
-
-  // Get the output canvas and scale it to the desired size
-  let output: HTMLCanvasElement;
-  if (domCanvasId) {
-    output = document.getElementById(domCanvasId) as HTMLCanvasElement;
-  } else {
-    output = document.createElement('canvas');
-    document.body.appendChild(output);
-  }
-  output.width = outputDimensions.w;
-  output.height = outputDimensions.h;
-
-  // Copy the input canvas to the DOM one
-  canvas.toHtmlCanvas(output);
-
-  // If we rescaled the output, show a full-resolution detail in the bottom-right corner
-  if (maxDimension) {
-    // Calculate the output rectangle
-    let outputLeft = Math.floor(outputDimensions.w / 2);
-    let outputTop = Math.floor(outputDimensions.h / 2);
-    let outputRect = FimRect.fromCoordinates(outputLeft, outputTop,
-      outputDimensions.xRight, outputDimensions.yBottom);
-
-    // Calculate the input rectangle
-    let inputLeft = Math.floor(Math.abs(canvas.w - outputRect.w) / 2);
-    let inputTop = Math.floor(Math.abs(canvas.h - outputRect.h) / 2);
-    let inputRect = FimRect.fromXYWidthHeight(inputLeft, inputTop, outputRect.w, outputRect.h);
-
-    // Draw the detail view
-    canvas.toHtmlCanvas(output, inputRect, outputRect);
-  }
-
-  // Overlay text
-  if (message) {
-    let ctx = output.getContext('2d');
-    ctx.save();
-    ctx.globalCompositeOperation = 'difference';
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#fff';
-
-    // Handle multi-line strings. fillText() ignores newlines and carriage returns.
-    let y = 16;
-    message.split('\n').forEach(line => {
-      ctx.fillText(line, 8, y);
-      y += 8;
-    });
-
-    ctx.restore();
-  }
-  
-  // Wait for the browser to render a frame
-  return waitForAnimationFrame();
-}
-
-/** Copies a FimGLTexture onto a FimGLCanvas */
-export function textureToCanvas(gl: FimGLCanvas, texture: FimGLTexture): void {
-  using(new FimGLProgramCopy(gl), program => {
-    program.setInputs(texture);
-    program.execute();
-  });
-}
-
 /** Hash table of performance results */
 export type PerformanceResultsSet = {[id: string]: IPerformanceResults}; 
 
@@ -292,14 +187,6 @@ export function recordPerformanceValue(id: string, results: IPerformanceResults,
     updateTotals(performanceValues);
   }
 }
-
-// Write GPU details to the screen if there is a <div id="gpu">
-$(() => {
-  let gpuDiv = $('#gpu');
-  if (gpuDiv) {
-    gpuDiv.text(JSON.stringify(FimGLCapabilities.getCapabilities(), null, 4));
-  }  
-});
 
 
 //

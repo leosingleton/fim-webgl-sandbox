@@ -1,0 +1,35 @@
+{
+  "name": "@leosingleton/fim-webgl-sandbox",
+  "version": "0.1.0",
+  "author": "Leo C. Singleton IV <leo@leosingleton.com>",
+  "description": "WebGL Sandbox",
+  "homepage": "https://github.com/leosingleton/fim-webgl-sandbox",
+  "license": "MIT",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leosingleton/fim-webgl-sandbox.git"
+  },
+  "devDependencies": {
+    "@types/bootstrap": "4.3.1",
+    "@types/file-saver": "^2.0.1",
+    "@types/jquery": "^3.3.30",
+    "@types/node": "^12.7.2",
+    "bootstrap": "^4.3.1",
+    "copy-webpack-plugin": "^5.0.3",
+    "file-saver": "^2.0.2",
+    "jquery": "^3.4.1",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.5",
+    "webpack-glsl-minify": "^1.0.4"
+  },
+  "dependencies": {
+    "@leosingleton/commonlibs": "^1.0.0-alpha.25",
+    "@leosingleton/fim": "1.0.0-alpha.14"
+  },
+  "scripts": {
+    "build": "npx webpack --mode=none"
+  }
+}

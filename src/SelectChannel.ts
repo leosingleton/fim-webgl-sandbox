@@ -1,8 +1,8 @@
-// FIM - Fast Image Manipulation Library for Javascript
+// WebGL Sandbox
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
-import { FimGLCanvas, FimGLProgram, FimGLTexture } from '../../../build/dist/index.js';
+import { FimGLCanvas, FimGLProgram, FimGLTexture } from '@leosingleton/fim';
 
 /** GL program to create a greyscale image from one color channel */
 export class SelectChannelProgram extends FimGLProgram {
