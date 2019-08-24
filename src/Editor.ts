@@ -137,7 +137,8 @@ function onExecuteShader(shader: Shader): void {
     } else {
       let select = $('<select class="form-control"/>').attr('id', id).appendTo(group);
       textures.forEach(texture => {
-        select.append($('<option/>').attr('value', texture.id).text(texture.name));
+        let name = `${texture.name} (${texture.canvas.w} x ${texture.canvas.h})`;
+        select.append($('<option/>').attr('value', texture.id).text(name));
       });
 
       // Set the default selected option
