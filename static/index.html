@@ -3,6 +3,7 @@
   <head>
     <title>WebGL Sandbox - Create, test, and debug WebGL fragment shaders</title>
     <link href="bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/sandbox.css" rel="stylesheet" />
     <script src="samples.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
@@ -24,10 +25,10 @@
           <table class="table">
             <thead class="thead-dark">
               <tr>
-                <th>Shader (<a href="#" onclick="Samples.Editor.addShader()">Create</a>
-                  &nbsp;|&nbsp;
-                  <a href="#"><label for="shader-upload">Import</label><input type="file" id="shader-upload"
-                    style="display:none" accept="text/plain" multiple
+                <th>Shader (<a href="#" class="whitelink" onclick="Samples.Editor.addShader()">Create</a>
+                  |
+                  <a href="#"><label for="shader-upload" class="whitelink">Import</label><input type="file"
+                    id="shader-upload" style="display:none" accept="text/plain" multiple
                     onchange="Samples.Editor.uploadShaders(this.files)" /></a>)
                 </th>
                 <th>Actions</th>
@@ -42,8 +43,8 @@
               <thead class="thead-dark">
                 <tr>
                   <th>Texture
-                    (<a href="#"><label for="texture-upload">Import</label><input type="file" id="texture-upload"
-                      style="display:none" accept="image/*" multiple
+                    (<a href="#"><label for="texture-upload" class="whitelink">Import</label><input type="file"
+                      id="texture-upload" style="display:none" accept="image/*" multiple
                       onchange="Samples.Editor.uploadTextures(this.files)" /></a>)
                   </th>
                   <th>Dimensions</th>

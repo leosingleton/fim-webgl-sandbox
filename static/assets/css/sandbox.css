@@ -1,0 +1,13 @@
+.whitelink {
+  color: #aaa;
+  cursor: pointer;
+}
+
+.whitelink:hover {
+  color: #eee;
+  text-decoration: underline;
+}
+
+label.whitelink {
+  margin: 0;
+}
