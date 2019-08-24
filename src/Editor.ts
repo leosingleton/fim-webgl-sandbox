@@ -286,8 +286,7 @@ class Texture {
 
   public static async createFromFile(file: File): Promise<Texture> {
     let canvas = await FimCanvas.createFromImageBlob(file);
-    let name = `${file.name} (${canvas.w}x${canvas.h})`;
-    return new Texture(name, canvas);
+    return new Texture(file.name, canvas);
   }
 
   private static idCount = 0;
@@ -309,6 +308,9 @@ function refreshTextureList(): void {
       row.append($('<td/>').append($('<input type="text" id="rename-texture" class="form-control"/>')
         .val(texture.name).focusout(() => onRenameTextureDone(texture))));
     }
+
+    // Dimensions column
+    row.append($('<td/>').text(`${texture.canvas.w} x ${texture.canvas.h}`));
 
     let actions = $('<td/>').appendTo(row);
     actions.append($('<a href="#">View</a>').click(() => onViewTexture(texture)));
