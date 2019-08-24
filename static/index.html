@@ -20,6 +20,7 @@
 
       <div class="row">
         <div class="col-lg-6">
+          <!-- Shaders Table -->
           <table class="table">
             <thead class="thead-dark">
               <tr>
@@ -37,6 +38,7 @@
         </div>
 
         <div class="col-lg-6">
+          <!-- Textures Table -->
           <table class="table">
               <thead class="thead-dark">
                 <tr>
@@ -54,6 +56,7 @@
         </div>
       </div>
 
+      <!-- Add Shader dialog box -->
       <div class="modal fade" tabindex="-1" id="add-shader">
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content">
@@ -86,6 +89,7 @@
         </div>
       </div>
 
+      <!-- Execute Shader dialog box -->
       <div class="modal fade" tabindex="-1" id="execute-shader">
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content">
@@ -111,17 +115,40 @@
 
             <div class="modal-body">
               <form id="execute-shader-form"></form>
-              <div id="execute-shader-errors" style="white-space: pre-wrap; background-color: #f99; padding: 8pt; display: none"></div>
+              <div id="execute-shader-errors" class="error-box"></div>
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary btn-lg" onclick="Sandbox.Editor.executeShaderOk()">Execute</button>
+              <button type="button" class="btn btn-secondary btn-lg"
+                onclick="Sandbox.Editor.executePerformanceTest()">Run Performance Test</button>
+              <button type="button" class="btn btn-primary btn-lg"
+                onclick="Sandbox.Editor.executeShaderOk()">Execute</button>
             </div>           
           </div>
         </div>
       </div>
 
-      <div id="errors" style="white-space: pre-wrap; background-color: #f99; padding: 8pt; display: none"></div>
+      <!-- Performance Results dialog box -->
+      <div class="modal fade" tabindex="-1" id="performance-results">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 className="modal-title">Performance Results</h5>
+              <button type="button" class="close" data-dismiss="modal">
+                <span>&times;</span>
+              </button>
+            </div>
+
+            <div id="performance-results-body" class="modal-body" style="white-space: pre-line"></div>
+  
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">Close</button>
+            </div>           
+          </div>
+        </div>
+      </div>
+  
+      <div id="errors" class="error-box"></div>
 
       <div class="footer-copyright text-center py-3">&copy; 2016-2019
         <a href="https://www.leosingleton.com/">Leo C. Singleton IV</a>

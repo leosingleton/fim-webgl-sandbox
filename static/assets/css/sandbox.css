@@ -15,3 +15,10 @@ th {
 label.whitelink {
   margin: 0;
 }
+
+.error-box {
+  white-space: pre-wrap;
+  background-color: #f99;
+  padding: 8pt;
+  display: none;
+}

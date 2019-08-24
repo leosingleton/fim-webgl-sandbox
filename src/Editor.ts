@@ -2,6 +2,7 @@
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
+import { IPerformanceResults, perfTest } from './Common';
 import { Program } from './Program';
 import { createSampleShaders } from './SampleShaders';
 import { SelectChannelProgram } from './SelectChannel';
@@ -67,9 +68,22 @@ export namespace Editor {
     }
   }
 
+  /** Handler for the 'Run Performance Test' button in the execute shader dialog */
+  export function executePerformanceTest(): void {
+    try {
+      let results = runCurrentShader(true) as IPerformanceResults;
+      $('#performance-results-body').text(results.message);
+      $('#performance-results').modal('show');
+    } catch (err) {
+      $('#execute-shader-errors').text(err);
+      $('#execute-shader-errors').show();
+    }
+  }
+
+  /** Handler for the OK button in the execute shader dialog */
   export function executeShaderOk(): void {
     try {
-      let canvas = runCurrentShader();
+      let canvas = runCurrentShader() as FimCanvas;
 
       let texture = new Texture(`Output of ${currentShader.name} ${++currentShader.executionCount}`, canvas);
       textures.push(texture);
@@ -161,8 +175,8 @@ function onExecuteShader(shader: Shader): void {
 }
 
 /** Handles the OK button on the execute shader dialog */
-function runCurrentShader(): FimCanvas {
-  let result: FimCanvas;
+function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResults {
+  let result: FimCanvas | IPerformanceResults;
 
   let width = $('#execute-shader-width').val() as number;
   let height = $('#execute-shader-height').val() as number;
@@ -187,8 +201,12 @@ function runCurrentShader(): FimCanvas {
       }
     }
     
-    program.execute();
-    result = gl.duplicateCanvas();
+    if (performanceTest) {
+      result = perfTest(currentShader.name, () => program.execute());
+    } else {
+      program.execute();
+      result = gl.duplicateCanvas();
+    }
   });
 
   // On success, store the values for the next time the execute dialog is opened for this shader
