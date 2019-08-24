@@ -3,12 +3,12 @@
 // See LICENSE in the project root for license information.
 
 import { Program } from './Program';
+import { createSampleShaders } from './SampleShaders';
 import { SelectChannelProgram } from './SelectChannel';
-import { Shader } from './Shader';
+import { Shader, VariableDefinition } from './Shader';
 import { Texture } from './Texture';
 import { DisposableSet } from '@leosingleton/commonlibs';
 import { FimCanvas, FimGLCanvas, FimGLTexture } from '@leosingleton/fim';
-import { FimGLVariableDefinition } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { saveAs } from 'file-saver';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -27,6 +27,11 @@ $(() => {
       let shader = new Shader(name, source, id);
       shaders.push(shader);  
     }
+  }
+
+  // If there are no shaders in load storage, populate the app with some sample ones to get started
+  if (shaders.length === 0) {
+    shaders = createSampleShaders();
   }
 
   refreshShaderList();
@@ -110,12 +115,6 @@ function refreshShaderList(): void {
     actions.append(' | ');
     actions.append($('<a href="#">Delete</a>').click(() => onDeleteShader(shader)));
   });
-}
-
-/** Adds an additional property to the existing interface */
-interface VariableDefinition extends FimGLVariableDefinition {
-  /** Uniform value, as it appears as a string in the UI */
-  dialogValue: string;
 }
 
 let currentShader: Shader = null;

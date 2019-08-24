@@ -5,7 +5,8 @@
 import { Program } from './Program';
 import { using } from '@leosingleton/commonlibs';
 import { FimGLCanvas } from '@leosingleton/fim';
-import { FimGLVariableDefinitionMap, FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
+import { FimGLVariableDefinition, FimGLVariableDefinitionMap,
+  FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 
 export class Shader implements FimGLShader {
   public constructor(name: string, sourceCode: string, id?: number) {
@@ -72,4 +73,10 @@ export class Shader implements FimGLShader {
   }
 
   private static idCount = 0;
+}
+
+/** Adds an additional property to the existing interface */
+export interface VariableDefinition extends FimGLVariableDefinition {
+  /** Uniform value, as it appears as a string in the UI */
+  dialogValue: string;
 }
