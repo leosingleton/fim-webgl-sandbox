@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@leosingleton/commonlibs": "^1.0.0-alpha.25",
-    "@leosingleton/fim": "1.0.0-alpha.13"
+    "@leosingleton/fim": "1.0.0-alpha.14"
   },
   "scripts": {
     "build": "npx webpack --mode=none"
