@@ -1,37 +1,23 @@
 {
-  "name": "@leosingleton/fim",
-  "version": "1.0.0-alpha.14",
+  "name": "@leosingleton/fim-webgl-sandbox",
+  "version": "0.1.0",
   "author": "Leo C. Singleton IV <leo@leosingleton.com>",
-  "description": "Fast Image Manipulation Library for JavaScript",
-  "homepage": "https://github.com/leosingleton/fim",
+  "description": "WebGL Sandbox",
+  "homepage": "https://github.com/leosingleton/fim-webgl-sandbox",
   "license": "MIT",
   "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/leosingleton/fim.git"
+    "url": "https://github.com/leosingleton/fim-webgl-sandbox.git"
   },
   "devDependencies": {
     "@types/bootstrap": "4.3.1",
     "@types/file-saver": "^2.0.1",
-    "@types/jasmine": "^3.3.13",
-    "@types/jest": "^24.0.15",
     "@types/jquery": "^3.3.30",
-    "@types/node": "^12.6.2",
     "bootstrap": "^4.3.1",
     "copy-webpack-plugin": "^5.0.3",
     "file-saver": "^2.0.2",
-    "glob": "^7.1.4",
-    "jasmine-core": "^3.4.0",
-    "jest": "^24.8.0",
-    "jest-junit": "^6.4.0",
     "jquery": "^3.4.1",
-    "karma": "^4.2.0",
-    "karma-chrome-launcher": "^3.0.0",
-    "karma-edge-launcher": "^0.4.2",
-    "karma-firefox-launcher": "^1.1.0",
-    "karma-jasmine": "^2.0.1",
-    "karma-junit-reporter": "^1.2.0",
-    "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",
     "webpack": "^4.35.3",
@@ -39,21 +25,10 @@
     "webpack-glsl-minify": "^1.0.4"
   },
   "dependencies": {
-    "@leosingleton/commonlibs": "^1.0.0-alpha.25"
+    "@leosingleton/commonlibs": "^1.0.0-alpha.25",
+    "@leosingleton/fim": "1.0.0-alpha.13"
   },
   "scripts": {
-    "build": "npx webpack --mode=none",
-    "samples": "cd samples && npx webpack",
-    "test": "npm run test:node && npm run test:web",
-    "test:all": "npm run test:node && npm run test:web:all",
-    "test:node": "npx jest --config=jest.node.config.js --maxWorkers=2 --coverage",
-    "test:web": "npx webpack --mode=development --config=webpack.test.js && npx karma start",
-    "test:web:debug": "npx webpack --mode=development --config=webpack.test.js && npx karma start --single-run=false --browsers Chrome",
-    "test:web:all": "npx webpack --mode=development --config=webpack.test.js && npx karma start --browsers ChromeHeadless,Edge,Firefox"
-  },
-  "files": [
-    "build/dist/"
-  ],
-  "main": "build/dist/index.js",
-  "types": "build/dist/index.d.ts"
+    "build": "npx webpack --mode=none"
+  }
 }
