@@ -4,7 +4,8 @@
 
 import { SelectChannelProgram } from './SelectChannel';
 import { FimCanvas, FimGLCanvas, FimGLProgram, FimGLTexture } from '@leosingleton/fim';
-import { FimGLVariableDefinitionMap, FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
+import { FimGLVariableDefinition, FimGLVariableDefinitionMap,
+  FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { using, DisposableSet } from '@leosingleton/commonlibs';
 import { saveAs } from 'file-saver';
 import $ from 'jquery';
@@ -190,27 +191,39 @@ function refreshShaderList(): void {
   });
 }
 
+/** Adds an additional property to the existing interface */
+interface VariableDefinition extends FimGLVariableDefinition {
+  /** Uniform value, as it appears as a string in the UI */
+  dialogValue: string;
+}
+
 let currentShader: Shader = null;
 
+/** Displays the execute shader dialog box */
 function onExecuteShader(shader: Shader): void {
   currentShader = shader;
 
   $('#execute-shader-form div').remove();
 
   for (let uname in shader.uniforms) {
-    let u = shader.uniforms[uname];
+    let u = shader.uniforms[uname] as VariableDefinition;
     let id = `uniform-${u.variableName}`;
     let text = `${u.variableName} (${u.variableType})`;
 
     let group = $('<div class="form-group"/>').attr('for', id).appendTo('#execute-shader-form');
     group.append($('<label class="control-label"/>').text(text));
     if (u.variableType.indexOf('sampler') === -1) {
-      group.append($('<input type="text" class="form-control"/>').attr('id', id));
+      group.append($('<input type="text" class="form-control"/>').attr('id', id).val(u.dialogValue));
     } else {
       let select = $('<select class="form-control"/>').attr('id', id).appendTo(group);
       textures.forEach(texture => {
         select.append($('<option/>').attr('value', texture.id).text(texture.name));
       });
+
+      // Set the default selected option
+      if (u.dialogValue) {
+        select.val(u.dialogValue);
+      }
     }
   }
 
@@ -218,6 +231,7 @@ function onExecuteShader(shader: Shader): void {
   $('#execute-shader').modal('show');
 }
 
+/** Handles the OK button on the execute shader dialog */
 function runCurrentShader(): FimCanvas {
   let result: FimCanvas;
 
@@ -245,6 +259,13 @@ function runCurrentShader(): FimCanvas {
     program.execute();
     result = gl.duplicateCanvas();
   });
+
+  // On success, store the values for the next time the execute dialog is opened for this shader
+  for (let uname in currentShader.uniforms) {
+    let u = currentShader.uniforms[uname] as VariableDefinition;
+    let id = `#uniform-${u.variableName}`;
+    u.dialogValue = $(id).val().toString();
+  }
 
   return result;
 }
