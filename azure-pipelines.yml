@@ -20,6 +20,10 @@ jobs:
       npm run build
     displayName: 'Compile Output'
 
+  - script: |
+      npm run build:production
+    displayName: 'Production Build'
+
   - task: CopyFiles@2
     inputs:
       sourceFolder: '$(Build.SourcesDirectory)'
