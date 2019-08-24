@@ -2,8 +2,7 @@
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
-import { FimCanvas, FimGLCanvas, FimGLCapabilities, FimGLProgramCopy, FimGLTexture,
-  FimRect } from '../../build/dist/index.js';
+import { FimCanvas, FimGLCanvas, FimGLCapabilities, FimGLProgramCopy, FimGLTexture, FimRect } from '@leosingleton/fim';
 import { Stopwatch, parseQueryString, using } from '@leosingleton/commonlibs';
 import $ from 'jquery';
 

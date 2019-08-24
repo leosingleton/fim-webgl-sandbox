@@ -26,18 +26,16 @@ var config = {
     new CopyWebpackPlugin([
       {
         context: './static/',
-        from: '**/*',
-        to: './'
+        from: '**/*'
       },
       {
-        context: '../node_modules/bootstrap/dist/css/',
-        from: 'bootstrap.min.css',
-        to: './editor/'
+        context: './node_modules/bootstrap/dist/css/',
+        from: 'bootstrap.min.css'
       }
     ])
   ],
   output: {
-    path: path.resolve(__dirname, '../build/samples'),
+    path: path.resolve(__dirname, './build/samples'),
     filename: 'samples.js',
     library: 'Samples'
   }

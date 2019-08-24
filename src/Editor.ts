@@ -3,8 +3,8 @@
 // See LICENSE in the project root for license information.
 
 import { SelectChannelProgram } from './SelectChannel';
-import { FimCanvas, FimGLCanvas, FimGLProgram, FimGLTexture } from '../../../build/dist/index.js';
-import { FimGLVariableDefinitionMap, FimGLShader } from '../../../build/dist/gl/FimGLShader';
+import { FimCanvas, FimGLCanvas, FimGLProgram, FimGLTexture } from '@leosingleton/fim';
+import { FimGLVariableDefinitionMap, FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { using, DisposableSet } from '@leosingleton/commonlibs';
 import { saveAs } from 'file-saver';
 import $ from 'jquery';
