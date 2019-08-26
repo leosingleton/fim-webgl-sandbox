@@ -10,7 +10,6 @@ including creating uniforms and importing existing JPEG or PNG images as texture
 testing and applying filters to images.
 
 <p align="center" >
-  <img src="https://www.leosingleton.com/webgl-sandbox/assets/icons/play-circle.svg" width="64" height="64" /><br/>
   <a href="https://www.leosingleton.com/webgl-sandbox/">Try it out</a>
 </p>
 
