@@ -4,7 +4,7 @@
 
 import { Shader, VariableDefinition } from './Shader';
 
-export function createSampleShaders(): Shader[] {
+export async function createSampleShaders(): Promise<Shader[]> {
   let sample1 = new Shader('Sample 1: RGB Gradient',
 `#version 100
 precision mediump float;
@@ -22,6 +22,7 @@ void main()
     vCoord.x * (1.0 - vCoord.y), // Blue
     1.0);                        // Alpha
 }`);
+  await sample1.compile();
 
   let sample2 = new Shader('Sample 2: Invert',
 `#version 100
@@ -42,6 +43,7 @@ void main()
   // The output color of the fragment shader is returned in gl_FragColor
   gl_FragColor = vec4(vec3(1.0) - inputPixel, 1.0);
 }`);
+  await sample2.compile();
 
   let sample3 = new Shader('Sample 3: Gaussian Blur',
 `#version 100
@@ -57,7 +59,8 @@ uniform sampler2D uInputTexture;
 // This parameter takes the input dimensions, in pixels
 uniform vec2 uInputDimensions;
 
-#define KERNEL_SIZE 7
+// This parameter specifies the number of elements in the uGaussianKernel array
+@const int KERNEL_SIZE
 
 // This parameter requires a Gaussian kernel, such as the following (sigma=2):
 // [0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]
@@ -80,8 +83,10 @@ void main()
 
   gl_FragColor = vec4(colorSum.rgb, 1.0);
 }`);
-  (sample3.uniforms.uInputDimensions as VariableDefinition).dialogValue = '[512, 512]';
-  (sample3.uniforms.uGaussianKernel as VariableDefinition).dialogValue =
+  await sample3.compile();
+  (sample3.shader.consts.KERNEL_SIZE as VariableDefinition).dialogValue = '7';
+  (sample3.shader.uniforms.uInputDimensions as VariableDefinition).dialogValue = '[512, 512]';
+  (sample3.shader.uniforms.uGaussianKernel as VariableDefinition).dialogValue =
     '[0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]';
 
   return [sample1, sample2, sample3];
