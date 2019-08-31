@@ -226,6 +226,9 @@ async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IP
       program.execute();
       result = gl.duplicateCanvas();
     }
+
+    // Store any const or uniform values
+    currentShader.writeToLocalStorage();
   });
 
   // On success, store the values for the next time the execute dialog is opened for this shader

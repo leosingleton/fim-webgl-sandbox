@@ -119,6 +119,18 @@ export class Shader {
   public writeToLocalStorage(): void {
     localStorage.setItem(`shader_name_${this.id}`, this.name);
     localStorage.setItem(`shader_source_${this.id}`, this.sourceCode);
+
+    // Save constant values
+    for (let cname in this.shader.consts) {
+      let c = this.shader.consts[cname] as VariableDefinition;
+      localStorage.setItem(`shader_const_${this.id}_${cname}`, c.dialogValue);
+    }
+
+    // Save uniform values
+    for (let uname in this.shader.uniforms) {
+      let u = this.shader.uniforms[uname] as VariableDefinition;
+      localStorage.setItem(`shader_uniform_${this.id}_${uname}`, u.dialogValue);
+    }
   }
 
   public readonly id: number;
@@ -159,6 +171,19 @@ export class Shader {
     // Create the shader
     let shader = new Shader(name, source, id);
     await shader.compile();
+
+    // Load constant values
+    for (let cname in shader.shader.consts) {
+      let c = shader.shader.consts[cname] as VariableDefinition;
+      c.dialogValue = localStorage.getItem(`shader_const_${id}_${cname}`);
+    }
+
+    // Load uniform values
+    for (let uname in shader.shader.uniforms) {
+      let u = shader.shader.uniforms[uname] as VariableDefinition;
+      u.dialogValue = localStorage.getItem(`shader_uniform_${id}_${uname}`);
+    }
+
     return shader;
   }
 
