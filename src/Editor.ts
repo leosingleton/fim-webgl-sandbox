@@ -260,8 +260,7 @@ function onDeleteShader(shader: Shader): void {
   refreshShaderList();
 
   // Also delete from local storage
-  localStorage.removeItem(`shader_name_${shader.id}`);
-  localStorage.removeItem(`shader_source_${shader.id}`);
+  shader.deleteFromLocalStorage();
 }
 
 let textures: Texture[] = [];

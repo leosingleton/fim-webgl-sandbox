@@ -133,6 +133,18 @@ export class Shader {
     }
   }
 
+  public deleteFromLocalStorage(): void {
+    localStorage.removeItem(`shader_name_${this.id}`);
+    localStorage.removeItem(`shader_source_${this.id}`);
+
+    for (let n = 0; n < localStorage.length; n++) {
+      let key = localStorage.key(n);
+      if (key.indexOf(`shader_const_${this.id}_`) === 0 || key.indexOf(`shader_uniform_${this.id}_`) === 0) {
+        localStorage.removeItem(key);
+      }
+    }
+  }
+
   public readonly id: number;
   public readonly name: string;
   public readonly sourceCode: string;
