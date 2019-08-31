@@ -114,8 +114,9 @@ export class Shader {
         program.compileProgram();
       });
     });
+  }
 
-    // Write the shader to local storage
+  public writeToLocalStorage(): void {
     localStorage.setItem(`shader_name_${this.id}`, this.name);
     localStorage.setItem(`shader_source_${this.id}`, this.sourceCode);
   }

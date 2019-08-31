@@ -21,6 +21,9 @@ $(async () => {
   // If there are no shaders in local storage, populate the app with some sample ones to get started
   if (shaders.length === 0) {
     shaders = await createSampleShaders();
+
+    // Write the sample shaders to local storage
+    shaders.forEach(shader => shader.writeToLocalStorage());
   }
 
   refreshShaderList();
@@ -46,6 +49,8 @@ export namespace Editor {
       let id = currentShader ? currentShader.id : null;
       let shader = new Shader(name, source, id);
       await shader.compile();
+      shader.writeToLocalStorage();
+
       shaders = shaders.filter(s => s !== currentShader);
       shaders.push(shader);
       refreshShaderList();
