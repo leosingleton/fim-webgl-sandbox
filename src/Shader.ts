@@ -201,9 +201,10 @@ export class Shader {
 
     for (let n = 0; n < localStorage.length; n++) {
       let key = localStorage.key(n);
-      if (key.indexOf('shader_name_') === 0) {
+      let parts = key.split('_');
+      if (parts.length === 3 && parts[0] === 'shader' && parts[2] === 'name') {
         // We found a shader
-        let id = Number.parseInt(key.substring(12));
+        let id = Number.parseInt(parts[1]);
         shaders.push(await this.createFromLocalStorage(id));
       }
     }
