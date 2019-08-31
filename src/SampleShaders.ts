@@ -59,7 +59,8 @@ uniform sampler2D uInputTexture;
 // This parameter takes the input dimensions, in pixels
 uniform vec2 uInputDimensions;
 
-#define KERNEL_SIZE 7
+// This parameter specifies the number of elements in the uGaussianKernel array
+@const int KERNEL_SIZE
 
 // This parameter requires a Gaussian kernel, such as the following (sigma=2):
 // [0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]
@@ -83,6 +84,7 @@ void main()
   gl_FragColor = vec4(colorSum.rgb, 1.0);
 }`);
   await sample3.compile();
+  (sample3.shader.consts.KERNEL_SIZE as VariableDefinition).dialogValue = '7';
   (sample3.shader.uniforms.uInputDimensions as VariableDefinition).dialogValue = '[512, 512]';
   (sample3.shader.uniforms.uGaussianKernel as VariableDefinition).dialogValue =
     '[0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]';

@@ -5,7 +5,8 @@
 import { Program } from './Program';
 import { using } from '@leosingleton/commonlibs';
 import { FimGLCanvas } from '@leosingleton/fim';
-import { GlslShader, GlslVariable } from 'webpack-glsl-minify';
+import { FimGLVariableDefinition } from '@leosingleton/fim/build/dist/gl/FimGLShader';
+import { GlslShader } from 'webpack-glsl-minify';
 import { GlslMinify } from 'webpack-glsl-minify/build/minify.js';
 
 export class Shader {
@@ -27,11 +28,85 @@ export class Shader {
   public async compile(): Promise<void> {
     // Use webpack-glsl-minify to parse the source code
     let minify = new GlslMinify({
-      //preserveDefines: true,
-      //preserveUniforms: true,
-      //preserveVariables: true
+      preserveDefines: true,
+      preserveUniforms: true,
+      preserveVariables: true
     });
     this.shader = await minify.execute(this.sourceCode);
+
+    // Populate any @const values with some value to keep the WebGL compiler happy
+    for (let cname in this.shader.consts) {
+      let c = this.shader.consts[cname] as VariableDefinition;
+      if (!c.variableValue) {
+        switch (c.variableType) {
+          case 'int':
+          case 'uint':
+          case 'float':
+          case 'double':
+            c.variableValue = 1;
+            break;
+
+          case 'vec2':
+          case 'bvec2':
+          case 'ivec2':
+          case 'uvec2':
+            c.variableValue = [0, 0];
+            break;
+          
+          case 'vec3':
+          case 'bvec3':
+          case 'ivec3':
+          case 'uvec3':
+            c.variableValue = [0, 0, 0];
+            break;
+
+          case 'vec4':
+          case 'bvec4':
+          case 'ivec4':
+          case 'uvec4':
+            c.variableValue = [0, 0, 0, 0];
+            break;
+
+          case 'bool':
+            c.variableValue = true;
+            break;
+
+          case 'mat2':
+          case 'mat2x2':
+            c.variableValue = [0, 0, 0, 0];
+            break;
+
+          case 'mat2x3':
+          case 'mat3x2':
+            c.variableValue = [0, 0, 0, 0, 0, 0];
+            break;
+
+          case 'mat2x4':
+          case 'mat4x2':
+            c.variableValue = [0, 0, 0, 0, 0, 0, 0, 0];
+            break;
+
+          case 'mat3':
+          case 'mat3x3':
+            c.variableValue = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+            break;
+
+          case 'mat3x4':
+          case 'mat4x3':
+            c.variableValue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            break;
+
+          case 'mat4':
+          case 'mat4x4':
+            c.variableValue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            break;
+
+          default:
+            c.variableValue = [1];
+            break;
+        }
+      }
+    }
 
     // Try to compile the shader
     using(new FimGLCanvas(100, 100), gl => {
@@ -74,7 +149,7 @@ export class Shader {
 }
 
 /** Adds additional properties to the existing interface to track dialog state and avoid creating a new object */
-export interface VariableDefinition extends GlslVariable {
+export interface VariableDefinition extends FimGLVariableDefinition {
   /** Uniform value, as it appears as a string in the UI */
   dialogValue: string;
 

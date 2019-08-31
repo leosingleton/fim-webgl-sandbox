@@ -71,9 +71,9 @@ export namespace Editor {
   }
 
   /** Handler for the 'Run Performance Test' button in the execute shader dialog */
-  export function executePerformanceTest(): void {
+  export async function executePerformanceTest(): Promise<void> {
     try {
-      let results = runCurrentShader(true) as IPerformanceResults;
+      let results = await runCurrentShader(true) as IPerformanceResults;
       $('#performance-results-body').text(results.message);
       $('#performance-results').modal('show');
     } catch (err) {
@@ -83,9 +83,9 @@ export namespace Editor {
   }
 
   /** Handler for the OK button in the execute shader dialog */
-  export function executeShaderOk(): void {
+  export async function executeShaderOk(): Promise<void> {
     try {
-      let canvas = runCurrentShader() as FimCanvas;
+      let canvas = await runCurrentShader() as FimCanvas;
 
       let texture = new Texture(`Output of ${currentShader.name} ${++currentShader.executionCount}`, canvas);
       textures.push(texture);
@@ -140,8 +140,21 @@ function onExecuteShader(shader: Shader): void {
   currentShader = shader;
   let s = shader.shader;
 
+  // Remove all previous edit controls
   $('#execute-shader-form div').remove();
 
+  // Add edit controls for consts
+  for (let cname in s.consts) {
+    let c = s.consts[cname] as VariableDefinition;
+    let id = `const-${cname}`;
+    let text = `${cname} (${c.variableType})`;
+
+    let group = $('<div class="form-group"/>').appendTo('#execute-shader-form');
+    group.append($('<label class="control-label"/>').attr('for', id).text(text));
+    group.append($('<input type="text" class="form-control"/>').attr('id', id).val(c.dialogValue));
+  }
+
+  // Add edit controls for uniforms
   for (let uname in s.uniforms) {
     let u = s.uniforms[uname] as VariableDefinition;
     let id = `uniform-${u.variableName}`;
@@ -178,16 +191,23 @@ function onExecuteShader(shader: Shader): void {
 }
 
 /** Handles the OK button on the execute shader dialog */
-function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResults {
+async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IPerformanceResults> {
   let s = currentShader.shader;
   let result: FimCanvas | IPerformanceResults;
 
   let width = $('#execute-shader-width').val() as number;
   let height = $('#execute-shader-height').val() as number;
 
-  DisposableSet.using(disposable => {
+  await DisposableSet.usingAsync(async disposable => {
     let gl = disposable.addDisposable(new FimGLCanvas(width, height));
     let program = disposable.addDisposable(new Program(gl, s));
+
+    for (let cname in s.consts) {
+      let c = s.consts[cname];
+      let id = `#const-${cname}`;
+      let value = eval($(id).val().toString());
+      program.setConst(cname, value);
+    }
 
     for (let uname in s.uniforms) {
       let u = s.uniforms[uname];
@@ -205,6 +225,9 @@ function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResu
       }
     }
     
+    // Recompile the shader as the @const values may have changed
+    await currentShader.compile();
+
     if (performanceTest) {
       result = perfTest(currentShader.name, () => program.execute());
     } else {
