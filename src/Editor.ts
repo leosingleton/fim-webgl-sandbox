@@ -14,7 +14,7 @@ import { saveAs } from 'file-saver';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-$(() => {
+$(async () => {
   // Load previous shaders from local storage on startup
   for (let n = 0; n < localStorage.length; n++) {
     let key = localStorage.key(n);
@@ -26,6 +26,7 @@ $(() => {
 
       // Create the shader
       let shader = new Shader(name, source, id);
+      await shader.compile();
       shaders.push(shader);  
     }
   }
@@ -57,6 +58,7 @@ export namespace Editor {
 
       let id = currentShader ? currentShader.id : null;
       let shader = new Shader(name, source, id);
+      await shader.compile();
       shaders = shaders.filter(s => s !== currentShader);
       shaders.push(shader);
       refreshShaderList();
@@ -136,11 +138,12 @@ let currentShader: Shader = null;
 /** Displays the execute shader dialog box */
 function onExecuteShader(shader: Shader): void {
   currentShader = shader;
+  let s = shader.shader;
 
   $('#execute-shader-form div').remove();
 
-  for (let uname in shader.uniforms) {
-    let u = shader.uniforms[uname] as VariableDefinition;
+  for (let uname in s.uniforms) {
+    let u = s.uniforms[uname] as VariableDefinition;
     let id = `uniform-${u.variableName}`;
     let text = `${u.variableName} (${u.variableType})`;
 
@@ -176,6 +179,7 @@ function onExecuteShader(shader: Shader): void {
 
 /** Handles the OK button on the execute shader dialog */
 function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResults {
+  let s = currentShader.shader;
   let result: FimCanvas | IPerformanceResults;
 
   let width = $('#execute-shader-width').val() as number;
@@ -183,10 +187,10 @@ function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResu
 
   DisposableSet.using(disposable => {
     let gl = disposable.addDisposable(new FimGLCanvas(width, height));
-    let program = disposable.addDisposable(new Program(gl, currentShader));
+    let program = disposable.addDisposable(new Program(gl, s));
 
-    for (let uname in currentShader.uniforms) {
-      let u = currentShader.uniforms[uname];
+    for (let uname in s.uniforms) {
+      let u = s.uniforms[uname];
       let id = `#uniform-${u.variableName}`;
       let value = eval($(id).val().toString());
       if (u.variableType.indexOf('sampler') === -1) {
@@ -210,8 +214,8 @@ function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResu
   });
 
   // On success, store the values for the next time the execute dialog is opened for this shader
-  for (let uname in currentShader.uniforms) {
-    let u = currentShader.uniforms[uname] as VariableDefinition;
+  for (let uname in s.uniforms) {
+    let u = s.uniforms[uname] as VariableDefinition;
     u.dialogValue = $(`#uniform-${u.variableName}`).val().toString();
     u.enableLinearFiltering = $(`#linear-${u.variableName}`).prop('checked');
   }

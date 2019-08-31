@@ -80,8 +80,8 @@ void main()
 
   gl_FragColor = vec4(colorSum.rgb, 1.0);
 }`);
-  (sample3.uniforms.uInputDimensions as VariableDefinition).dialogValue = '[512, 512]';
-  (sample3.uniforms.uGaussianKernel as VariableDefinition).dialogValue =
+  (sample3.shader.uniforms.uInputDimensions as VariableDefinition).dialogValue = '[512, 512]';
+  (sample3.shader.uniforms.uGaussianKernel as VariableDefinition).dialogValue =
     '[0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]';
 
   return [sample1, sample2, sample3];

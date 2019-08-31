@@ -5,13 +5,11 @@
 import { Program } from './Program';
 import { using } from '@leosingleton/commonlibs';
 import { FimGLCanvas } from '@leosingleton/fim';
-import { FimGLVariableDefinition, FimGLVariableDefinitionMap,
-  FimGLShader } from '@leosingleton/fim/build/dist/gl/FimGLShader';
+import { GlslShader, GlslVariable } from 'webpack-glsl-minify';
+import { GlslMinify } from 'webpack-glsl-minify/build/minify.js';
 
-export class Shader implements FimGLShader {
+export class Shader {
   public constructor(name: string, sourceCode: string, id?: number) {
-    let match: RegExpExecArray
-
     if (!id) {
       id = ++Shader.idCount;
     }
@@ -24,33 +22,33 @@ export class Shader implements FimGLShader {
     this.id = id;
     this.name = name;
     this.sourceCode = sourceCode;
+  }
 
-    // Parse the source code looking for uniforms
-    let uniformRegex = /uniform\s(\w+)\s(\w+)/g;
-    while (match = uniformRegex.exec(sourceCode)) {
-      this.uniforms[match[2]] = {
-        variableName: match[2],
-        variableType: match[1]
-      };
-    }
+  public async compile(): Promise<void> {
+    // Use webpack-glsl-minify to parse the source code
+    let minify = new GlslMinify({
+      preserveDefines: true,
+      preserveUniforms: true,
+      preserveVariables: true
+    });
+    this.shader = await minify.execute(this.sourceCode);
 
     // Try to compile the shader
     using(new FimGLCanvas(100, 100), gl => {
-      using(new Program(gl, this), program => {
+      using(new Program(gl, this.shader), program => {
         program.compileProgram();
       });
     });
 
     // Write the shader to local storage
-    localStorage.setItem(`shader_name_${id}`, name);
-    localStorage.setItem(`shader_source_${id}`, sourceCode);
+    localStorage.setItem(`shader_name_${this.id}`, name);
+    localStorage.setItem(`shader_source_${this.id}`, this.sourceCode);
   }
 
   public readonly id: number;
   public readonly name: string;
   public readonly sourceCode: string;
-  public readonly uniforms: FimGLVariableDefinitionMap = {};
-  public readonly consts: FimGLVariableDefinitionMap = {};
+  public shader: GlslShader;
   public executionCount = 0;
 
   public static createFromFile(file: File): Promise<Shader> {
@@ -76,7 +74,7 @@ export class Shader implements FimGLShader {
 }
 
 /** Adds additional properties to the existing interface to track dialog state and avoid creating a new object */
-export interface VariableDefinition extends FimGLVariableDefinition {
+export interface VariableDefinition extends GlslVariable {
   /** Uniform value, as it appears as a string in the UI */
   dialogValue: string;
 
