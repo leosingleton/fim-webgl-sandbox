@@ -33,7 +33,7 @@ $(async () => {
 
   // If there are no shaders in load storage, populate the app with some sample ones to get started
   if (shaders.length === 0) {
-    shaders = createSampleShaders();
+    shaders = await createSampleShaders();
   }
 
   refreshShaderList();

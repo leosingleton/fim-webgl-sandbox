@@ -27,9 +27,9 @@ export class Shader {
   public async compile(): Promise<void> {
     // Use webpack-glsl-minify to parse the source code
     let minify = new GlslMinify({
-      preserveDefines: true,
-      preserveUniforms: true,
-      preserveVariables: true
+      //preserveDefines: true,
+      //preserveUniforms: true,
+      //preserveVariables: true
     });
     this.shader = await minify.execute(this.sourceCode);
 
@@ -41,7 +41,7 @@ export class Shader {
     });
 
     // Write the shader to local storage
-    localStorage.setItem(`shader_name_${this.id}`, name);
+    localStorage.setItem(`shader_name_${this.id}`, this.name);
     localStorage.setItem(`shader_source_${this.id}`, this.sourceCode);
   }
 
