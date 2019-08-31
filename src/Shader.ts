@@ -117,29 +117,26 @@ export class Shader {
   }
 
   public writeToLocalStorage(): void {
-    localStorage.setItem(`shader_name_${this.id}`, this.name);
-    localStorage.setItem(`shader_source_${this.id}`, this.sourceCode);
+    localStorage.setItem(`shader_${this.id}_name`, this.name);
+    localStorage.setItem(`shader_${this.id}_source`, this.sourceCode);
 
     // Save constant values
     for (let cname in this.shader.consts) {
       let c = this.shader.consts[cname] as VariableDefinition;
-      localStorage.setItem(`shader_const_${this.id}_${cname}`, c.dialogValue);
+      localStorage.setItem(`shader_${this.id}_const_${cname}`, c.dialogValue);
     }
 
     // Save uniform values
     for (let uname in this.shader.uniforms) {
       let u = this.shader.uniforms[uname] as VariableDefinition;
-      localStorage.setItem(`shader_uniform_${this.id}_${uname}`, u.dialogValue);
+      localStorage.setItem(`shader_${this.id}_uniform_${uname}`, u.dialogValue);
     }
   }
 
   public deleteFromLocalStorage(): void {
-    localStorage.removeItem(`shader_name_${this.id}`);
-    localStorage.removeItem(`shader_source_${this.id}`);
-
     for (let n = 0; n < localStorage.length; n++) {
       let key = localStorage.key(n);
-      if (key.indexOf(`shader_const_${this.id}_`) === 0 || key.indexOf(`shader_uniform_${this.id}_`) === 0) {
+      if (key.indexOf(`shader_${this.id}_`) === 0) {
         localStorage.removeItem(key);
       }
     }
@@ -177,8 +174,8 @@ export class Shader {
   }
 
   public static async createFromLocalStorage(id: number): Promise<Shader> {
-    let name = localStorage.getItem(`shader_name_${id}`);
-    let source = localStorage.getItem(`shader_source_${id}`);
+    let name = localStorage.getItem(`shader_${id}_name`);
+    let source = localStorage.getItem(`shader_${id}_source`);
 
     // Create the shader
     let shader = new Shader(name, source, id);
@@ -187,13 +184,13 @@ export class Shader {
     // Load constant values
     for (let cname in shader.shader.consts) {
       let c = shader.shader.consts[cname] as VariableDefinition;
-      c.dialogValue = localStorage.getItem(`shader_const_${id}_${cname}`);
+      c.dialogValue = localStorage.getItem(`shader_${id}_const_${cname}`);
     }
 
     // Load uniform values
     for (let uname in shader.shader.uniforms) {
       let u = shader.shader.uniforms[uname] as VariableDefinition;
-      u.dialogValue = localStorage.getItem(`shader_uniform_${id}_${uname}`);
+      u.dialogValue = localStorage.getItem(`shader_${id}_uniform_${uname}`);
     }
 
     return shader;
