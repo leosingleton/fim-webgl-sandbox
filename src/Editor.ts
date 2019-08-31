@@ -16,22 +16,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 $(async () => {
   // Load previous shaders from local storage on startup
-  for (let n = 0; n < localStorage.length; n++) {
-    let key = localStorage.key(n);
-    if (key.indexOf('shader_name_') === 0) {
-      // We found a shader
-      let id = Number.parseInt(key.substring(12));
-      let name = localStorage.getItem(`shader_name_${id}`);
-      let source = localStorage.getItem(`shader_source_${id}`);
+  shaders = await Shader.createAllFromLocalStorage();
 
-      // Create the shader
-      let shader = new Shader(name, source, id);
-      await shader.compile();
-      shaders.push(shader);  
-    }
-  }
-
-  // If there are no shaders in load storage, populate the app with some sample ones to get started
+  // If there are no shaders in local storage, populate the app with some sample ones to get started
   if (shaders.length === 0) {
     shaders = await createSampleShaders();
   }

@@ -126,7 +126,13 @@ export class Shader {
   public shader: GlslShader;
   public executionCount = 0;
 
-  public static createFromFile(file: File): Promise<Shader> {
+  public static async createFromFile(file: File): Promise<Shader> {
+    let shader = await this.createFromFileHelper(file);
+    await shader.compile();
+    return shader;
+  }
+
+  private static createFromFileHelper(file: File): Promise<Shader> {
     return new Promise((resolve, reject) => {
       let fr = new FileReader();
       fr.readAsText(file);
@@ -143,6 +149,31 @@ export class Shader {
         reject(err);
       };
     });
+  }
+
+  public static async createFromLocalStorage(id: number): Promise<Shader> {
+    let name = localStorage.getItem(`shader_name_${id}`);
+    let source = localStorage.getItem(`shader_source_${id}`);
+
+    // Create the shader
+    let shader = new Shader(name, source, id);
+    await shader.compile();
+    return shader;
+  }
+
+  public static async createAllFromLocalStorage(): Promise<Shader[]> {
+    let shaders: Shader[] = [];
+
+    for (let n = 0; n < localStorage.length; n++) {
+      let key = localStorage.key(n);
+      if (key.indexOf('shader_name_') === 0) {
+        // We found a shader
+        let id = Number.parseInt(key.substring(12));
+        shaders.push(await this.createFromLocalStorage(id));
+      }
+    }
+
+    return shaders;
   }
 
   private static idCount = 0;
