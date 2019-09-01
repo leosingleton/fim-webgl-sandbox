@@ -151,7 +151,7 @@ function onExecuteShader(shader: Shader): void {
     let id = `uniform-${u.variableName}`;
     let text = `${u.variableName} (${u.variableType})`;
 
-    let group = $('<div class="form-group"/>').appendTo('#execute-shader-form');
+    let group = $('<div class="form-group py-2"/>').appendTo('#execute-shader-form');
     group.append($('<label class="control-label"/>').attr('for', id).text(text));
     if (u.variableType.indexOf('sampler') === -1) {
       group.append($('<input type="text" class="form-control"/>').attr('id', id).val(u.dialogValue));
@@ -169,7 +169,7 @@ function onExecuteShader(shader: Shader): void {
       }
 
       // Also show a checkbox to enable linear sampling
-      let check = $('<div class="form-check"/>').appendTo('#execute-shader-form');
+      let check = $('<div class="form-check"/>').appendTo(group);
       let checkId = `linear-${u.variableName}`;
       check.append($('<input type="checkbox" class="form-check-input"/>').attr('id', checkId).prop('checked',
         u.enableLinearFiltering));
@@ -194,7 +194,6 @@ async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IP
     let program = disposable.addDisposable(new Program(gl, s));
 
     for (let cname in s.consts) {
-      let c = s.consts[cname];
       let id = `#const-${cname}`;
       let value = eval($(id).val().toString());
       program.setConst(cname, value);
