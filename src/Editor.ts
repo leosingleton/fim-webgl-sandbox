@@ -46,8 +46,7 @@ export namespace Editor {
         throw new Error('Source code is required');
       }
 
-      let id = currentShader ? currentShader.id : null;
-      let shader = new Shader(name, source, id);
+      let shader = new Shader(name, source, currentShader);
       await shader.compile();
       shader.writeToLocalStorage();
 

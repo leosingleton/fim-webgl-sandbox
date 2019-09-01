@@ -10,8 +10,14 @@ import { GlslShader } from 'webpack-glsl-minify';
 import { GlslMinify } from 'webpack-glsl-minify/build/minify.js';
 
 export class Shader {
-  public constructor(name: string, sourceCode: string, id?: number) {
-    if (!id) {
+  public constructor(name: string, sourceCode: string, idOrOldShader?: number | Shader) {
+    let id: number;
+    if (typeof idOrOldShader === 'number') {
+      id = idOrOldShader;
+    } else if (typeof idOrOldShader === 'object') {
+      id = idOrOldShader.id;
+      this.executionCount = idOrOldShader.executionCount;
+    } else {
       id = ++Shader.idCount;
     }
 
