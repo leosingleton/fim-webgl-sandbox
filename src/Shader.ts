@@ -134,8 +134,7 @@ export class Shader {
   }
 
   public deleteFromLocalStorage(): void {
-    for (let n = 0; n < localStorage.length; n++) {
-      let key = localStorage.key(n);
+    for (let key in localStorage) {
       if (key.indexOf(`shader_${this.id}_`) === 0) {
         localStorage.removeItem(key);
       }
