@@ -77,8 +77,10 @@ export namespace Editor {
   export async function executeShaderOk(): Promise<void> {
     try {
       let canvas = await runCurrentShader() as FimCanvas;
+      currentShader.executionCount++;
 
-      let texture = new Texture(`Output of ${currentShader.name} ${++currentShader.executionCount}`, canvas);
+      let textureName = $('#execute-shader-name').val().toString();
+      let texture = new Texture(textureName, canvas);
       textures.push(texture);
       refreshTextureList();
 
@@ -130,6 +132,10 @@ let currentShader: Shader = null;
 function onExecuteShader(shader: Shader): void {
   currentShader = shader;
   let s = shader.shader;
+
+  // Initialize the name of the texture
+  let textureName = `Output of ${shader.name} ${shader.executionCount + 1}`;
+  $('#execute-shader-name').val(textureName);
 
   // Remove all previous edit controls
   $('#execute-shader-form div').remove();
