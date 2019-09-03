@@ -79,7 +79,7 @@
                     style="font-family: monospace"></textarea>
                 </div>
               </form>
-              <div id="add-shader-errors" style="white-space: pre; background-color: #f99; padding: 8pt; display: none"></div>
+              <div id="add-shader-errors" class="error-box"></div>
             </div>
 
             <div class="modal-footer">
@@ -102,6 +102,10 @@
 
             <div class="modal-body">
               <form>
+                <div class="form-group">
+                  <label for="execute-shader-name" class="control-label">Output Texture Name</label>
+                  <input id="execute-shader-name" type="text" class="form-control" />
+                </div>
                 <div class="form-group">
                   <label for="execute-shader-width" class="control-label">Output Width (Pixels)</label>
                   <input id="execute-shader-width" type="number" class="form-control" value="512" />

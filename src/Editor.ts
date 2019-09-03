@@ -6,34 +6,25 @@ import { IPerformanceResults, perfTest } from './Common';
 import { Program } from './Program';
 import { createSampleShaders } from './SampleShaders';
 import { SelectChannelProgram } from './SelectChannel';
-import { Shader, VariableDefinition } from './Shader';
+import { Shader } from './Shader';
 import { Texture } from './Texture';
 import { DisposableSet } from '@leosingleton/commonlibs';
 import { FimCanvas, FimGLCanvas, FimGLTexture, FimGLTextureOptions, FimGLTextureFlags } from '@leosingleton/fim';
 import { saveAs } from 'file-saver';
+import { GlslVariable } from 'webpack-glsl-minify';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 $(async () => {
   // Load previous shaders from local storage on startup
-  for (let n = 0; n < localStorage.length; n++) {
-    let key = localStorage.key(n);
-    if (key.indexOf('shader_name_') === 0) {
-      // We found a shader
-      let id = Number.parseInt(key.substring(12));
-      let name = localStorage.getItem(`shader_name_${id}`);
-      let source = localStorage.getItem(`shader_source_${id}`);
+  shaders = await Shader.createAllFromLocalStorage();
 
-      // Create the shader
-      let shader = new Shader(name, source, id);
-      await shader.compile();
-      shaders.push(shader);  
-    }
-  }
-
-  // If there are no shaders in load storage, populate the app with some sample ones to get started
+  // If there are no shaders in local storage, populate the app with some sample ones to get started
   if (shaders.length === 0) {
     shaders = await createSampleShaders();
+
+    // Write the sample shaders to local storage
+    shaders.forEach(shader => shader.writeToLocalStorage());
   }
 
   refreshShaderList();
@@ -56,9 +47,10 @@ export namespace Editor {
         throw new Error('Source code is required');
       }
 
-      let id = currentShader ? currentShader.id : null;
-      let shader = new Shader(name, source, id);
+      let shader = new Shader(name, source, currentShader);
       await shader.compile();
+      shader.writeToLocalStorage();
+
       shaders = shaders.filter(s => s !== currentShader);
       shaders.push(shader);
       refreshShaderList();
@@ -86,8 +78,10 @@ export namespace Editor {
   export async function executeShaderOk(): Promise<void> {
     try {
       let canvas = await runCurrentShader() as FimCanvas;
+      currentShader.executionCount++;
 
-      let texture = new Texture(`Output of ${currentShader.name} ${++currentShader.executionCount}`, canvas);
+      let textureName = $('#execute-shader-name').val().toString();
+      let texture = new Texture(textureName, canvas);
       textures.push(texture);
       refreshTextureList();
 
@@ -140,30 +134,36 @@ function onExecuteShader(shader: Shader): void {
   currentShader = shader;
   let s = shader.shader;
 
+  // Initialize the name of the texture
+  let textureName = `Output of ${shader.name} ${shader.executionCount + 1}`;
+  $('#execute-shader-name').val(textureName);
+
   // Remove all previous edit controls
   $('#execute-shader-form div').remove();
 
   // Add edit controls for consts
   for (let cname in s.consts) {
-    let c = s.consts[cname] as VariableDefinition;
+    let c = s.consts[cname] as GlslVariable;
     let id = `const-${cname}`;
     let text = `${cname} (${c.variableType})`;
+    let value = shader.values[id];
 
     let group = $('<div class="form-group"/>').appendTo('#execute-shader-form');
     group.append($('<label class="control-label"/>').attr('for', id).text(text));
-    group.append($('<input type="text" class="form-control"/>').attr('id', id).val(c.dialogValue));
+    group.append($('<input type="text" class="form-control"/>').attr('id', id).val(value || ''));
   }
 
   // Add edit controls for uniforms
   for (let uname in s.uniforms) {
-    let u = s.uniforms[uname] as VariableDefinition;
+    let u = s.uniforms[uname] as GlslVariable;
     let id = `uniform-${u.variableName}`;
     let text = `${u.variableName} (${u.variableType})`;
+    let value = shader.values[id];
 
-    let group = $('<div class="form-group"/>').appendTo('#execute-shader-form');
+    let group = $('<div class="form-group py-2"/>').appendTo('#execute-shader-form');
     group.append($('<label class="control-label"/>').attr('for', id).text(text));
     if (u.variableType.indexOf('sampler') === -1) {
-      group.append($('<input type="text" class="form-control"/>').attr('id', id).val(u.dialogValue));
+      group.append($('<input type="text" class="form-control"/>').attr('id', id).val(value || ''));
     } else {
       // sampler2D uniforms are special: We show a drop-down of textures instead
       let select = $('<select class="form-control"/>').attr('id', id).appendTo(group);
@@ -173,15 +173,15 @@ function onExecuteShader(shader: Shader): void {
       });
 
       // Set the default selected option
-      if (u.dialogValue) {
-        select.val(u.dialogValue);
+      if (value) {
+        select.val(value);
       }
 
       // Also show a checkbox to enable linear sampling
-      let check = $('<div class="form-check"/>').appendTo('#execute-shader-form');
+      let check = $('<div class="form-check"/>').appendTo(group);
       let checkId = `linear-${u.variableName}`;
       check.append($('<input type="checkbox" class="form-check-input"/>').attr('id', checkId).prop('checked',
-        u.enableLinearFiltering));
+        shader.linearFiltering[id]));
       check.append($('<label class="form-check-label"/>').attr('for', checkId).text('Enable linear filtering'));
     }
   }
@@ -203,7 +203,6 @@ async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IP
     let program = disposable.addDisposable(new Program(gl, s));
 
     for (let cname in s.consts) {
-      let c = s.consts[cname];
       let id = `#const-${cname}`;
       let value = eval($(id).val().toString());
       program.setConst(cname, value);
@@ -237,11 +236,23 @@ async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IP
   });
 
   // On success, store the values for the next time the execute dialog is opened for this shader
-  for (let uname in s.uniforms) {
-    let u = s.uniforms[uname] as VariableDefinition;
-    u.dialogValue = $(`#uniform-${u.variableName}`).val().toString();
-    u.enableLinearFiltering = $(`#linear-${u.variableName}`).prop('checked');
+  for (let cname in s.consts) {
+    let id = `const-${cname}`;
+    currentShader.values[id] = $(`#${id}`).val().toString();
   }
+
+  for (let uname in s.uniforms) {
+    let id = `uniform-${uname}`;
+    currentShader.values[id] = $(`#${id}`).val().toString();
+
+    let linear = $(`#linear-${uname}`).prop('checked');
+    if (linear !== undefined) {
+      currentShader.linearFiltering[id] = linear;
+    }
+  }
+
+  // Persist any const or uniform values in local storage
+  currentShader.writeToLocalStorage();
 
   return result;
 }
@@ -265,8 +276,7 @@ function onDeleteShader(shader: Shader): void {
   refreshShaderList();
 
   // Also delete from local storage
-  localStorage.removeItem(`shader_name_${shader.id}`);
-  localStorage.removeItem(`shader_source_${shader.id}`);
+  shader.deleteFromLocalStorage();
 }
 
 let textures: Texture[] = [];

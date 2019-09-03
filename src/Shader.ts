@@ -3,15 +3,21 @@
 // See LICENSE in the project root for license information.
 
 import { Program } from './Program';
-import { using } from '@leosingleton/commonlibs';
+import { deepCopy, using } from '@leosingleton/commonlibs';
 import { FimGLCanvas } from '@leosingleton/fim';
 import { FimGLVariableDefinition } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { GlslShader } from 'webpack-glsl-minify';
 import { GlslMinify } from 'webpack-glsl-minify/build/minify.js';
 
 export class Shader {
-  public constructor(name: string, sourceCode: string, id?: number) {
-    if (!id) {
+  public constructor(name: string, sourceCode: string, idOrOldShader?: number | Shader) {
+    let id: number;
+    if (typeof idOrOldShader === 'number') {
+      id = idOrOldShader;
+    } else if (typeof idOrOldShader === 'object') {
+      id = idOrOldShader.id;
+      this.executionCount = idOrOldShader.executionCount;
+    } else {
       id = ++Shader.idCount;
     }
 
@@ -23,6 +29,14 @@ export class Shader {
     this.id = id;
     this.name = name;
     this.sourceCode = sourceCode;
+
+    if (typeof idOrOldShader === 'object') {
+      this.values = deepCopy(idOrOldShader.values);
+      this.linearFiltering = deepCopy(idOrOldShader.linearFiltering);
+    } else {
+      this.values = {};
+      this.linearFiltering = {};
+    }
   }
 
   public async compile(): Promise<void> {
@@ -36,7 +50,7 @@ export class Shader {
 
     // Populate any @const values with some value to keep the WebGL compiler happy
     for (let cname in this.shader.consts) {
-      let c = this.shader.consts[cname] as VariableDefinition;
+      let c = this.shader.consts[cname] as FimGLVariableDefinition;
       if (!c.variableValue) {
         switch (c.variableType) {
           case 'int':
@@ -114,10 +128,29 @@ export class Shader {
         program.compileProgram();
       });
     });
+  }
 
-    // Write the shader to local storage
-    localStorage.setItem(`shader_name_${this.id}`, this.name);
-    localStorage.setItem(`shader_source_${this.id}`, this.sourceCode);
+  public writeToLocalStorage(): void {
+    localStorage.setItem(`shader_${this.id}_name`, this.name);
+    localStorage.setItem(`shader_${this.id}_source`, this.sourceCode);
+
+    // Save constant and uniform values
+    for (let vname in this.values) {
+      let value = this.values[vname];
+      localStorage.setItem(`shader_${this.id}_${vname}`, value);
+    }
+    for (let uname in this.linearFiltering) {
+      let value = this.linearFiltering[uname];
+      localStorage.setItem(`shader_${this.id}_${uname}_linear`, value.toString());
+    }
+  }
+
+  public deleteFromLocalStorage(): void {
+    for (let key in localStorage) {
+      if (key.indexOf(`shader_${this.id}_`) === 0) {
+        localStorage.removeItem(key);
+      }
+    }
   }
 
   public readonly id: number;
@@ -126,7 +159,19 @@ export class Shader {
   public shader: GlslShader;
   public executionCount = 0;
 
-  public static createFromFile(file: File): Promise<Shader> {
+  /** Maps the ID of an element in the UI (i.e. "uniform-name") to its value */
+  public values: { [id: string]: string };
+
+  /** Maps the ID of a sampler2D uniform (i.e. "uniform-name") to the value of the enable linear filtering boolean */
+  public linearFiltering: { [id: string]: boolean };
+
+  public static async createFromFile(file: File): Promise<Shader> {
+    let shader = await this.createFromFileHelper(file);
+    await shader.compile();
+    return shader;
+  }
+
+  private static createFromFileHelper(file: File): Promise<Shader> {
     return new Promise((resolve, reject) => {
       let fr = new FileReader();
       fr.readAsText(file);
@@ -145,14 +190,49 @@ export class Shader {
     });
   }
 
+  public static async createFromLocalStorage(id: number): Promise<Shader> {
+    let name = localStorage.getItem(`shader_${id}_name`);
+    let source = localStorage.getItem(`shader_${id}_source`);
+
+    // Create the shader
+    let shader = new Shader(name, source, id);
+    await shader.compile();
+
+    // Load constant values
+    for (let cname in shader.shader.consts) {
+      let cid = `const-${cname}`;
+      let value = localStorage.getItem(`shader_${id}_${cid}`);
+      shader.values[cid] = value || '';
+    }
+
+    // Load uniform values
+    for (let uname in shader.shader.uniforms) {
+      let uid = `uniform-${uname}`;
+      let value = localStorage.getItem(`shader_${id}_${uid}`);
+      shader.values[uid] = value || '';
+
+      let linear = localStorage.getItem(`shader_${id}_${uid}_linear`);
+      shader.linearFiltering[uid] = (linear === 'true');
+    }
+
+    return shader;
+  }
+
+  public static async createAllFromLocalStorage(): Promise<Shader[]> {
+    let shaders: Shader[] = [];
+
+    for (let n = 0; n < localStorage.length; n++) {
+      let key = localStorage.key(n);
+      let parts = key.split('_');
+      if (parts.length === 3 && parts[0] === 'shader' && parts[2] === 'name') {
+        // We found a shader
+        let id = Number.parseInt(parts[1]);
+        shaders.push(await this.createFromLocalStorage(id));
+      }
+    }
+
+    return shaders;
+  }
+
   private static idCount = 0;
-}
-
-/** Adds additional properties to the existing interface to track dialog state and avoid creating a new object */
-export interface VariableDefinition extends FimGLVariableDefinition {
-  /** Uniform value, as it appears as a string in the UI */
-  dialogValue: string;
-
-  /** For sampler2D uniforms, controls whether linear filtering is enabled */
-  enableLinearFiltering: boolean;
 }

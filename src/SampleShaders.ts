@@ -2,7 +2,7 @@
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
-import { Shader, VariableDefinition } from './Shader';
+import { Shader } from './Shader';
 
 export async function createSampleShaders(): Promise<Shader[]> {
   let sample1 = new Shader('Sample 1: RGB Gradient',
@@ -84,10 +84,9 @@ void main()
   gl_FragColor = vec4(colorSum.rgb, 1.0);
 }`);
   await sample3.compile();
-  (sample3.shader.consts.KERNEL_SIZE as VariableDefinition).dialogValue = '7';
-  (sample3.shader.uniforms.uInputDimensions as VariableDefinition).dialogValue = '[512, 512]';
-  (sample3.shader.uniforms.uGaussianKernel as VariableDefinition).dialogValue =
-    '[0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]';
+  sample3.values['const-KERNEL_SIZE'] = '7';
+  sample3.values['uniform-uInputDimensions'] = '[512, 512]';
+  sample3.values['uniform-uGaussianKernel'] = '[0.0705, 0.1333, 0.1882, 0.2156, 0.1882, 0.1333, 0.0705]';
 
   return [sample1, sample2, sample3];
 }
