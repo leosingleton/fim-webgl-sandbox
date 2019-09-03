@@ -6,11 +6,12 @@ import { IPerformanceResults, perfTest } from './Common';
 import { Program } from './Program';
 import { createSampleShaders } from './SampleShaders';
 import { SelectChannelProgram } from './SelectChannel';
-import { Shader, VariableDefinition } from './Shader';
+import { Shader } from './Shader';
 import { Texture } from './Texture';
 import { DisposableSet } from '@leosingleton/commonlibs';
 import { FimCanvas, FimGLCanvas, FimGLTexture, FimGLTextureOptions, FimGLTextureFlags } from '@leosingleton/fim';
 import { saveAs } from 'file-saver';
+import { GlslVariable } from 'webpack-glsl-minify';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -142,25 +143,27 @@ function onExecuteShader(shader: Shader): void {
 
   // Add edit controls for consts
   for (let cname in s.consts) {
-    let c = s.consts[cname] as VariableDefinition;
+    let c = s.consts[cname] as GlslVariable;
     let id = `const-${cname}`;
     let text = `${cname} (${c.variableType})`;
+    let value = shader.values[id];
 
     let group = $('<div class="form-group"/>').appendTo('#execute-shader-form');
     group.append($('<label class="control-label"/>').attr('for', id).text(text));
-    group.append($('<input type="text" class="form-control"/>').attr('id', id).val(c.dialogValue));
+    group.append($('<input type="text" class="form-control"/>').attr('id', id).val(value || ''));
   }
 
   // Add edit controls for uniforms
   for (let uname in s.uniforms) {
-    let u = s.uniforms[uname] as VariableDefinition;
+    let u = s.uniforms[uname] as GlslVariable;
     let id = `uniform-${u.variableName}`;
     let text = `${u.variableName} (${u.variableType})`;
+    let value = shader.values[id];
 
     let group = $('<div class="form-group py-2"/>').appendTo('#execute-shader-form');
     group.append($('<label class="control-label"/>').attr('for', id).text(text));
     if (u.variableType.indexOf('sampler') === -1) {
-      group.append($('<input type="text" class="form-control"/>').attr('id', id).val(u.dialogValue));
+      group.append($('<input type="text" class="form-control"/>').attr('id', id).val(value || ''));
     } else {
       // sampler2D uniforms are special: We show a drop-down of textures instead
       let select = $('<select class="form-control"/>').attr('id', id).appendTo(group);
@@ -170,15 +173,15 @@ function onExecuteShader(shader: Shader): void {
       });
 
       // Set the default selected option
-      if (u.dialogValue) {
-        select.val(u.dialogValue);
+      if (value) {
+        select.val(value);
       }
 
       // Also show a checkbox to enable linear sampling
       let check = $('<div class="form-check"/>').appendTo(group);
       let checkId = `linear-${u.variableName}`;
       check.append($('<input type="checkbox" class="form-check-input"/>').attr('id', checkId).prop('checked',
-        u.enableLinearFiltering));
+        shader.linearFiltering[id]));
       check.append($('<label class="form-check-label"/>').attr('for', checkId).text('Enable linear filtering'));
     }
   }
@@ -230,17 +233,26 @@ async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IP
       program.execute();
       result = gl.duplicateCanvas();
     }
-
-    // Store any const or uniform values
-    currentShader.writeToLocalStorage();
   });
 
   // On success, store the values for the next time the execute dialog is opened for this shader
-  for (let uname in s.uniforms) {
-    let u = s.uniforms[uname] as VariableDefinition;
-    u.dialogValue = $(`#uniform-${u.variableName}`).val().toString();
-    u.enableLinearFiltering = $(`#linear-${u.variableName}`).prop('checked');
+  for (let cname in s.consts) {
+    let id = `const-${cname}`;
+    currentShader.values[id] = $(`#${id}`).val().toString();
   }
+
+  for (let uname in s.uniforms) {
+    let id = `uniform-${uname}`;
+    currentShader.values[id] = $(`#${id}`).val().toString();
+
+    let linear = $(`#linear-${uname}`).prop('checked');
+    if (linear !== undefined) {
+      currentShader.linearFiltering[id] = linear;
+    }
+  }
+
+  // Persist any const or uniform values in local storage
+  currentShader.writeToLocalStorage();
 
   return result;
 }

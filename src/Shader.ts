@@ -29,6 +29,8 @@ export class Shader {
     this.id = id;
     this.name = name;
     this.sourceCode = sourceCode;
+    this.values = {};
+    this.linearFiltering = {};
   }
 
   public async compile(): Promise<void> {
@@ -42,7 +44,7 @@ export class Shader {
 
     // Populate any @const values with some value to keep the WebGL compiler happy
     for (let cname in this.shader.consts) {
-      let c = this.shader.consts[cname] as VariableDefinition;
+      let c = this.shader.consts[cname] as FimGLVariableDefinition;
       if (!c.variableValue) {
         switch (c.variableType) {
           case 'int':
@@ -126,16 +128,14 @@ export class Shader {
     localStorage.setItem(`shader_${this.id}_name`, this.name);
     localStorage.setItem(`shader_${this.id}_source`, this.sourceCode);
 
-    // Save constant values
-    for (let cname in this.shader.consts) {
-      let c = this.shader.consts[cname] as VariableDefinition;
-      localStorage.setItem(`shader_${this.id}_const_${cname}`, c.dialogValue);
+    // Save constant and uniform values
+    for (let vname in this.values) {
+      let value = this.values[vname];
+      localStorage.setItem(`shader_${this.id}_${vname}`, value);
     }
-
-    // Save uniform values
-    for (let uname in this.shader.uniforms) {
-      let u = this.shader.uniforms[uname] as VariableDefinition;
-      localStorage.setItem(`shader_${this.id}_uniform_${uname}`, u.dialogValue);
+    for (let uname in this.linearFiltering) {
+      let value = this.linearFiltering[uname];
+      localStorage.setItem(`shader_${this.id}_${uname}_linear`, value.toString());
     }
   }
 
@@ -152,6 +152,12 @@ export class Shader {
   public readonly sourceCode: string;
   public shader: GlslShader;
   public executionCount = 0;
+
+  /** Maps the ID of an element in the UI (i.e. "uniform-name") to its value */
+  public values: { [id: string]: string };
+
+  /** Maps the ID of a sampler2D uniform (i.e. "uniform-name") to the value of the enable linear filtering boolean */
+  public linearFiltering: { [id: string]: boolean };
 
   public static async createFromFile(file: File): Promise<Shader> {
     let shader = await this.createFromFileHelper(file);
@@ -188,14 +194,19 @@ export class Shader {
 
     // Load constant values
     for (let cname in shader.shader.consts) {
-      let c = shader.shader.consts[cname] as VariableDefinition;
-      c.dialogValue = localStorage.getItem(`shader_${id}_const_${cname}`);
+      let cid = `const-${cname}`;
+      let value = localStorage.getItem(`shader_${id}_${cid}`);
+      shader.values[cid] = value || '';
     }
 
     // Load uniform values
     for (let uname in shader.shader.uniforms) {
-      let u = shader.shader.uniforms[uname] as VariableDefinition;
-      u.dialogValue = localStorage.getItem(`shader_${id}_uniform_${uname}`);
+      let uid = `uniform-${uname}`;
+      let value = localStorage.getItem(`shader_${id}_${uid}`);
+      shader.values[uid] = value || '';
+
+      let linear = localStorage.getItem(`shader_${id}_${uid}_linear`);
+      shader.linearFiltering[uid] = (linear === 'true');
     }
 
     return shader;
@@ -218,13 +229,4 @@ export class Shader {
   }
 
   private static idCount = 0;
-}
-
-/** Adds additional properties to the existing interface to track dialog state and avoid creating a new object */
-export interface VariableDefinition extends FimGLVariableDefinition {
-  /** Uniform value, as it appears as a string in the UI */
-  dialogValue: string;
-
-  /** For sampler2D uniforms, controls whether linear filtering is enabled */
-  enableLinearFiltering: boolean;
 }
