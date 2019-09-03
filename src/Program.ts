@@ -14,7 +14,7 @@ export class Program extends FimGLProgram {
     super.compileProgram();
   }
 
-  public setConst(name: string, value: number | number[] | boolean | FimGLTexture): void {
+  public setConst(name: string, value: number | number[] | boolean): void {
     this.fragmentShader.consts[name].variableValue = value;
   }
 

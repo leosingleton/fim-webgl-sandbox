@@ -191,14 +191,14 @@ function onExecuteShader(shader: Shader): void {
 }
 
 /** Handles the OK button on the execute shader dialog */
-async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IPerformanceResults> {
+function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResults {
   let s = currentShader.shader;
   let result: FimCanvas | IPerformanceResults;
 
   let width = $('#execute-shader-width').val() as number;
   let height = $('#execute-shader-height').val() as number;
 
-  await DisposableSet.usingAsync(async disposable => {
+  DisposableSet.using(disposable => {
     let gl = disposable.addDisposable(new FimGLCanvas(width, height));
     let program = disposable.addDisposable(new Program(gl, s));
 
@@ -225,7 +225,7 @@ async function runCurrentShader(performanceTest = false): Promise<FimCanvas | IP
     }
     
     // Recompile the shader as the @const values may have changed
-    await currentShader.compile();
+    program.compileProgram();
 
     if (performanceTest) {
       result = perfTest(currentShader.name, () => program.execute());
