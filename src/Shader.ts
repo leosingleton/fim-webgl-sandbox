@@ -3,7 +3,7 @@
 // See LICENSE in the project root for license information.
 
 import { Program } from './Program';
-import { using } from '@leosingleton/commonlibs';
+import { deepCopy, using } from '@leosingleton/commonlibs';
 import { FimGLCanvas } from '@leosingleton/fim';
 import { FimGLVariableDefinition } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { GlslShader } from 'webpack-glsl-minify';
@@ -29,8 +29,14 @@ export class Shader {
     this.id = id;
     this.name = name;
     this.sourceCode = sourceCode;
-    this.values = {};
-    this.linearFiltering = {};
+
+    if (typeof idOrOldShader === 'object') {
+      this.values = deepCopy(idOrOldShader.values);
+      this.linearFiltering = deepCopy(idOrOldShader.linearFiltering);
+    } else {
+      this.values = {};
+      this.linearFiltering = {};
+    }
   }
 
   public async compile(): Promise<void> {
