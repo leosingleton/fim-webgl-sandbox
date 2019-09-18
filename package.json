@@ -14,16 +14,16 @@
     "@types/bootstrap": "^4.3.1",
     "@types/file-saver": "^2.0.1",
     "@types/jquery": "^3.3.31",
-    "@types/node": "^12.7.3",
+    "@types/node": "^12.7.5",
     "copy-webpack-plugin": "^5.0.4",
-    "ts-loader": "^6.0.4",
-    "typescript": "^3.6.2",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
+    "ts-loader": "^6.1.0",
+    "typescript": "^3.6.3",
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9"
   },
   "dependencies": {
     "@leosingleton/commonlibs": "^1.0.0-alpha.25",
-    "@leosingleton/fim": "^1.0.0-alpha.18",
+    "@leosingleton/fim": "^1.0.0-alpha.27",
     "bootstrap": "^4.3.1",
     "file-saver": "^2.0.2",
     "jquery": "^3.4.1",
