@@ -3,7 +3,11 @@
 // See LICENSE in the project root for license information.
 
 import { Stopwatch } from '@leosingleton/commonlibs';
+import { FimWeb } from '@leosingleton/fim';
 import $ from 'jquery';
+
+/** Global FIM library instance */
+export var fim = new FimWeb();
 
 /** Performance testing results */
 export interface IPerformanceResults {

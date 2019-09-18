@@ -2,14 +2,14 @@
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
-import { IPerformanceResults, perfTest } from './Common';
+import { IPerformanceResults, perfTest, fim } from './Common';
 import { Program } from './Program';
 import { createSampleShaders } from './SampleShaders';
 import { SelectChannelProgram } from './SelectChannel';
 import { Shader } from './Shader';
 import { Texture } from './Texture';
 import { DisposableSet } from '@leosingleton/commonlibs';
-import { FimCanvas, FimGLCanvas, FimGLTexture, FimGLTextureOptions, FimGLTextureFlags } from '@leosingleton/fim';
+import { FimCanvas, FimGLTextureOptions, FimGLTextureFlags } from '@leosingleton/fim';
 import { saveAs } from 'file-saver';
 import { GlslVariable } from 'webpack-glsl-minify';
 import $ from 'jquery';
@@ -199,7 +199,7 @@ function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResu
   let height = $('#execute-shader-height').val() as number;
 
   DisposableSet.using(disposable => {
-    let gl = disposable.addDisposable(new FimGLCanvas(width, height));
+    let gl = disposable.addDisposable(fim.createGLCanvas(width, height));
     let program = disposable.addDisposable(new Program(gl, s));
 
     for (let cname in s.consts) {
@@ -218,7 +218,7 @@ function runCurrentShader(performanceTest = false): FimCanvas | IPerformanceResu
         let canvas = textures.find(v => v.id === value).canvas;
         let linear = $(`#linear-${u.variableName}`).prop('checked') as boolean;
         let options: FimGLTextureOptions = linear ? { textureFlags: FimGLTextureFlags.LinearSampling } : {};
-        let inputTexture = disposable.addDisposable(new FimGLTexture(gl, canvas.w, canvas.h, options));
+        let inputTexture = disposable.addDisposable(gl.createTexture(canvas.w, canvas.h, options));
         inputTexture.copyFrom(canvas);
         program.setUniform(uname, inputTexture);
       }
@@ -355,8 +355,8 @@ function onViewTextureChannel(texture: Texture, channel: 'R' | 'G' | 'B' | 'A'):
   let result: Promise<void>;
   DisposableSet.using(disposable => {
     let oldCanvas = texture.canvas;
-    let gl = disposable.addDisposable(new FimGLCanvas(oldCanvas.w, oldCanvas.h));
-    let tex = disposable.addDisposable(FimGLTexture.createFrom(gl, oldCanvas));
+    let gl = disposable.addDisposable(fim.createGLCanvas(oldCanvas.w, oldCanvas.h));
+    let tex = disposable.addDisposable(gl.createTextureFrom(oldCanvas));
     let p = disposable.addDisposable(new SelectChannelProgram(gl));
     p.setInputs(tex, channel);
     p.execute();

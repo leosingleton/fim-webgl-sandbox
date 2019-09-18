@@ -2,9 +2,9 @@
 // Copyright (c) Leo C. Singleton IV <leo@leosingleton.com>
 // See LICENSE in the project root for license information.
 
+import { fim } from './Common';
 import { Program } from './Program';
 import { deepCopy, using } from '@leosingleton/commonlibs';
-import { FimGLCanvas } from '@leosingleton/fim';
 import { FimGLVariableDefinition } from '@leosingleton/fim/build/dist/gl/FimGLShader';
 import { GlslShader } from 'webpack-glsl-minify';
 import { GlslMinify } from 'webpack-glsl-minify/build/minify.js';
@@ -123,7 +123,7 @@ export class Shader {
     }
 
     // Try to compile the shader
-    using(new FimGLCanvas(100, 100), gl => {
+    using(fim.createGLCanvas(100, 100), gl => {
       using(new Program(gl, this.shader), program => {
         program.compileProgram();
       });
