@@ -1,6 +1,6 @@
 {
   "name": "@leosingleton/fim-webgl-sandbox",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Leo C. Singleton IV <leo@leosingleton.com>",
   "description": "WebGL Sandbox",
   "homepage": "https://github.com/leosingleton/fim-webgl-sandbox",
@@ -22,8 +22,8 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "@leosingleton/commonlibs": "^1.3.1-alpha",
-    "@leosingleton/fim": "^1.2.0-alpha",
+    "@leosingleton/commonlibs": "^1.3.2-alpha",
+    "@leosingleton/fim": "^1.3.3-alpha",
     "bootstrap": "^4.4.1",
     "file-saver": "^2.0.2",
     "jquery": "^3.4.1",
